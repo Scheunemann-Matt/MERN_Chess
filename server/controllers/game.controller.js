@@ -18,9 +18,9 @@ module.exports.createGame = (req, res) => {
 
 module.exports.updateGame = (req, res) => {
     Game.findOne({_id: req.params.id})
-        .then(game => updateGame(game, req.body))
+        .then(game => updateGameData(game, req.body))
         .then(game => {
-            console.log(game)
+            console.log(game, "inside update route")
             Game.updateOne(
                 {_id: req.params.id},
                 game,
@@ -42,10 +42,13 @@ module.exports.deleteGame = (req, res) => {
 };
 
 
-const updateGame = (game, move) => {
+const updateGameData = (game, move) => {
+    console.log(game, move, "insideUpdate method")
     let startingCoords = move[0];
-    let enPassant = move[3];
+    let enPassant = move[4];
     let targetCoords = enPassant.used ? enPassant.removedPiece : move[1]
+    let promotion = move[3]
+    if (promotion !== "") game = promotionAdjustment(game, promotion)
     
     game.wPieces = game.wPieces.filter(piece => {
         return (piece[0] !== targetCoords[0] || piece[1] !== targetCoords[1])
@@ -69,6 +72,27 @@ const updateGame = (game, move) => {
     game.previousMoves.push(move[2])
     game.passant = enPassant
     return game;
+}
+
+const promotionAdjustment = (game, newPiece) => {
+    console.log(newPiece)
+    let targetCoords = [newPiece[0], newPiece[1]]
+    let type = newPiece[2]
+    let image = newPiece[3]
+    let player = newPiece[4]
+
+    if (player === "white"){
+        game.wPieces = game.wPieces.filter(piece => {
+            return (piece[0] !== targetCoords[0] || piece[1] !== targetCoords[1])
+        })
+        game.wPieces.push([newPiece[0], newPiece[1], type, image])
+    } else {
+        game.bPieces = game.bPieces.filter(piece => {
+            return (piece[0] !== targetCoords[0] || piece[1] !== targetCoords[1])
+        })
+        game.bPieces.push([newPiece[0], newPiece[1], type, image])
+    }
+    return game
 }
 
 const findPiece = (pieces, startingCoords) => {

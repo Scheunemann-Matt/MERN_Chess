@@ -7,7 +7,7 @@ const COORD_CONVERSION = ["A", "B", "C", "D", "E", "F", "G", "H"];
 
 const Game = (props) => {
     // Stuff from loaded game
-    const {board, validator, player, setPlayer, playerPieces, setPlayerPieces, previousMoves, setPreviousMoves, pushMoveToDB} = props;
+    const {board, validator, player, setPlayer, playerPieces, setPlayerPieces, previousMoves, setPreviousMoves, pushMoveToDB, promoSerialize} = props;
     const history = useHistory();
     // Holds selected node, false when nothing selected
     const [nodeSelected, setNodeSelected] = useState(false);
@@ -88,8 +88,7 @@ const Game = (props) => {
             (player === "white" && piece.yCoord === 7) ||
             piece.yCoord === 0))
         {
-            setPromotion([targetNode, piece]);
-            setNodeSelected(false)
+            setPromotion([targetNode, piece, nodeSelected]);
         } else {
             cleanUp(targetNode, piece);
         }
@@ -119,11 +118,10 @@ const Game = (props) => {
         let type = e.target.name
         let [targetNode, piece] = promotion
         board.promotion(targetNode, piece, playerPieces, player, type)
-        setPromotion(false)
-        cleanUp(targetNode, piece)
+        cleanUp(targetNode, piece, type)
     }
 
-    const cleanUp = (targetNode, piece) => {
+    const cleanUp = (targetNode, piece, type = "") => {
         checkTest()
 
         setPlayerPieces(playerPieces.reverse());
@@ -135,14 +133,18 @@ const Game = (props) => {
         if (piece.pieceType === "pawn" && Math.abs(nodeSelected.yCoord - targetNode.yCoord) > 1) {
             validator.setEnPassant(targetNode)
         }
-        
+        let promoData;
+        promoData = promotion ? promoSerialize(piece, type, promotion[2]) : ""
+        if (promotion) lastMove = previousMoves[previousMoves.length - 1]
         let formattedMove = [
             [nodeSelected.xCoord, nodeSelected.yCoord],
             [targetNode.xCoord, targetNode.yCoord],
             lastMove,
+            promoData
             ];
         pushMoveToDB(formattedMove);
 
+        setPromotion(false)
         setNodeSelected(false);
     }
 

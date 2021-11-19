@@ -83,4 +83,21 @@ export default class Serializer {
         }
         return result;
     }
+
+    savePromotion = (piece, type, previousNode) => {
+        let innerImage = ""
+        console.log(previousNode,"blah")
+
+        if (type === "knight") {
+            innerImage += "n"
+        } else {
+            innerImage += type[0];
+        }
+        innerImage += piece.player[0]
+
+        let image = `Chess_${innerImage}.svg`
+        let serializedInfo = [previousNode.xCoord, previousNode.yCoord, type, image, piece.player]
+
+        return serializedInfo
+    }
 }

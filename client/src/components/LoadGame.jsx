@@ -43,8 +43,13 @@ const LoadGame = () => {
         let passant = serializer.savePassant(validator.enPassant);
         move.push(passant)
         axios.put(`http://localhost:8000/api/games/${gameId}`, move)
-            .then(result => console.log(result))
+            .then(result => console.log(result, "move"))
             .catch(err => console.error(err))
+    }
+
+    const promoSerialize = (piece, type, previousNode) => {
+        let promo = serializer.savePromotion(piece, type, previousNode);
+        return promo
     }
 
 
@@ -58,6 +63,7 @@ const LoadGame = () => {
                     playerPieces={playerPieces} setPlayerPieces={setPlayerPieces}
                     previousMoves={previousMoves} setPreviousMoves={setPreviousMoves}
                     pushMoveToDB={pushMoveToDB}
+                    promoSerialize={promoSerialize}
                 />
             )}
         </div>
