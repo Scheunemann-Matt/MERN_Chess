@@ -16,8 +16,9 @@ const Game = (props) => {
     const [warning, setWarning] = useState(false);
     // Game over for checkmate popup
     const [gameOver, setGameOver] = useState(false);
-    // Necessary to send the last move to the database.
+    // Necessary to send info to the database.
     let lastMove;
+    let castle = "";
 
     const handleClick = (e) => {
         // Empty warning in case the move is valid
@@ -140,7 +141,8 @@ const Game = (props) => {
             [nodeSelected.xCoord, nodeSelected.yCoord],
             [targetNode.xCoord, targetNode.yCoord],
             lastMove,
-            promoData
+            promoData,
+            castle
             ];
         pushMoveToDB(formattedMove);
 
@@ -184,7 +186,7 @@ const Game = (props) => {
             board.updatePieceLoc(targetNode, startingNode, validator.castle.rook);
             return false;
         }
-
+        castle = [[startingNode.xCoord, startingNode.yCoord], [targetNode.xCoord, targetNode.yCoord]]
         return true
     }
 

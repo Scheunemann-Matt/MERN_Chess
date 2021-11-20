@@ -45,28 +45,24 @@ module.exports.deleteGame = (req, res) => {
 const updateGameData = (game, move) => {
     console.log(game, move, "insideUpdate method")
     let startingCoords = move[0];
-    let enPassant = move[4];
-    let targetCoords = enPassant.used ? enPassant.removedPiece : move[1]
-    let promotion = move[3]
-    if (promotion !== "") game = promotionAdjustment(game, promotion)
+    let enPassant = move[5];
+    let targetCoords = enPassant.used ? enPassant.removedPiece : move[1];
+
+    let promotion = move[3];
+    if (promotion !== "") game = promotionAdjustment(game, promotion);
+
+    let castle = move[4];
+    if (castle !== "") movePiece(castle[0], castle[1], game)
     
     game.wPieces = game.wPieces.filter(piece => {
-        return (piece[0] !== targetCoords[0] || piece[1] !== targetCoords[1])
+        return (piece[0] !== targetCoords[0] || piece[1] !== targetCoords[1]);
     })
     game.bPieces = game.bPieces.filter(piece => {
-        return (piece[0] !== targetCoords[0] || piece[1] !== targetCoords[1])
+        return (piece[0] !== targetCoords[0] || piece[1] !== targetCoords[1]);
     })
 
     targetCoords = move[1];
-    let movingPiece;
-    movingPiece = findPiece(game.wPieces, startingCoords);
-    if (!movingPiece){
-        movingPiece = findPiece(game.bPieces, startingCoords);
-    }
-    console.log(targetCoords)
-    movingPiece[0] = targetCoords[0];
-    movingPiece[1] = targetCoords[1];
-    if (movingPiece.length > 4) movingPiece.pop()
+    movePiece(startingCoords, targetCoords, game)
 
     game.player = game.player === "white" ? "black": "white" 
     game.previousMoves.push(move[2])
@@ -93,6 +89,18 @@ const promotionAdjustment = (game, newPiece) => {
         game.bPieces.push([newPiece[0], newPiece[1], type, image])
     }
     return game
+}
+
+const movePiece = (startingCoords, targetCoords, game) => {
+    let movingPiece;
+    movingPiece = findPiece(game.wPieces, startingCoords);
+    if (!movingPiece){
+        movingPiece = findPiece(game.bPieces, startingCoords);
+    }
+
+    movingPiece[0] = targetCoords[0];
+    movingPiece[1] = targetCoords[1];
+    if (movingPiece.length > 4) movingPiece.pop()
 }
 
 const findPiece = (pieces, startingCoords) => {
